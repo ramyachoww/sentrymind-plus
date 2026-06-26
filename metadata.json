@@ -1,0 +1,8 @@
+{
+  "name": "Copy of SentryMind+",
+  "description": "A secure, offline-first mental wellness web application for soldiers, featuring an adaptive AI therapist, mood tracking, and mindfulness exercises.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": []
+}

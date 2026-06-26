@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SentryMind+</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      // Prevents Flash of Incorrect Theme (FOUC)
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.25.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-stone-50 dark:bg-gray-900">
+    <script>
+      // This script makes the API key available to the app when running locally.
+      // In a real production app, you would use a more secure method like a backend server or environment variables.
+      window.process = {
+        env: {
+          // IMPORTANT: Replace this placeholder with your actual Google Gemini API key.
+          API_KEY: 'AIzaSyBHvy_O1P7w1nL-DtuGS54-EdqiFqDGeaE'
+        }
+      };
+
+      // Add dark mode support to Tailwind
+      tailwind.config = {
+        darkMode: 'class',
+      };
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
