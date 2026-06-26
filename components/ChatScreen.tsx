@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { ChatMessage, Page } from '../types';
-import { getGeminiResponse, getFollowUpSuggestions } from '../services/geminiService';
+import { getGeminiResponse, getFollowUpSuggestions, getApiKey } from '../services/geminiService';
 import { useRewards } from '../contexts/RewardContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import UpgradeModal from './UpgradeModal';
@@ -237,14 +237,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ setPage }) => {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             microphoneStreamRef.current = stream;
 
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            const ai = new GoogleGenAI({ apiKey: getApiKey() });
             
             inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
             outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
             nextStartTimeRef.current = 0;
 
             const sessionPromise = ai.live.connect({
-                model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+                model: 'gemini-2.0-flash-exp',
                 config: {
                     responseModalities: [Modality.AUDIO],
                     inputAudioTranscription: {},

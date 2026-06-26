@@ -1,6 +1,21 @@
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 import { AITone, ChatMessage, Mood, SleepLog, WorkoutLog } from '../types';
 
+export const getApiKey = (): string => {
+  const viteKey = import.meta.env?.VITE_GEMINI_API_KEY;
+  if (viteKey) return viteKey;
+  
+  const windowKey = (window as any).process?.env?.API_KEY;
+  if (windowKey) return windowKey;
+  
+  try {
+    const processKey = process?.env?.API_KEY;
+    if (processKey) return processKey;
+  } catch (e) {}
+  
+  return "";
+};
+
 const getSystemPrompt = (tone: AITone, isPremium: boolean): string => {
   if (isPremium) {
       return "Act as Mind Guardian+ for soldiers. Use 14-day context window (if available). Keep tone calm, CBT-based, non-clinical, and mission-friendly. Offer 1 actionable step and one follow-up question. Use user's recent mood scores and sleep hours from provided context.";
@@ -35,13 +50,14 @@ export const classifyTone = (message: string): AITone => {
 };
 
 export const getGeminiResponse = async (history: ChatMessage[], newMessage: string, isPremium: boolean): Promise<string> => {
-  if (!process.env.API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     console.error("API_KEY is not set.");
     return "I'm sorry, my connection is not configured correctly right now. Please try again later.";
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     const tone = classifyTone(newMessage);
     const systemInstruction = getSystemPrompt(tone, isPremium);
 
@@ -77,12 +93,13 @@ export const getGeminiResponse = async (history: ChatMessage[], newMessage: stri
 };
 
 export const getReflectionSummary = async (moodText: string): Promise<string> => {
-  if (!process.env.API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     console.error("API_KEY is not set.");
     return "Could not generate reflection due to a configuration issue.";
   }
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     const systemInstruction = "Summarize the user's last mood entry in 2 sentences and suggest a short action they can take. Tone: warm, non-judgmental.";
     
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -102,14 +119,15 @@ export const getReflectionSummary = async (moodText: string): Promise<string> =>
 };
 
 export const getFollowUpSuggestions = async (history: ChatMessage[]): Promise<string[]> => {
-  if (!process.env.API_KEY || history.length === 0) {
+  const apiKey = getApiKey();
+  if (!apiKey || history.length === 0) {
     return [];
   }
   // Use the last 4 messages for context
   const conversationContext = history.slice(-4).map(msg => `${msg.role}: ${msg.message}`).join('\n');
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     const systemInstruction = `Based on the last AI response in this conversation, generate 3 short, relevant follow-up questions a user might ask. The questions should be empathetic and encourage further reflection. Return them as a JSON array of strings in a key named 'suggestions'. Example format: {"suggestions": ["Tell me more about that.", "What is one small step I can take?"]}`;
 
     const responseSchema = {
@@ -150,7 +168,8 @@ export const getFollowUpSuggestions = async (history: ChatMessage[]): Promise<st
 };
 
 export const getWellnessInsights = async (moods: Mood[], sleep: SleepLog[], workouts: WorkoutLog[]): Promise<string> => {
-  if (!process.env.API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     console.error("API_KEY is not set.");
     return "Could not generate insights due to a configuration issue.";
   }
@@ -188,7 +207,7 @@ export const getWellnessInsights = async (moods: Mood[], sleep: SleepLog[], work
   `;
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -207,11 +226,12 @@ export const getWellnessInsights = async (moods: Mood[], sleep: SleepLog[], work
 
 
 export const getMissionFollowUp = async (missionTitle: string, history: { prompt: string; choice: string }[]): Promise<{ responseText: string; choices: string[] }> => {
-  if (!process.env.API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     return { responseText: "Connection not configured.", choices: ["Exit"] };
   }
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     const systemInstruction = `You are a resilience coach running a training simulation for a soldier. The mission is called "${missionTitle}".
 The user is presented with scenarios and makes choices. The simulation will last for exactly 5 questions.
 Your task is to provide a brief, narrative continuation of the scenario based on their last choice and then present 2-3 new, distinct choices.
@@ -260,11 +280,12 @@ Based on the last choice, continue the simulation.`;
 };
 
 export const getMissionAnalysis = async (missionTitle: string, transcript: { prompt: string; choice: string }[]): Promise<string> => {
-  if (!process.env.API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     return "Could not generate analysis due to a configuration issue.";
   }
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     const systemInstruction = `You are a resilience coach providing a performance review for a soldier who just completed a training simulation called "${missionTitle}".
 Analyze the provided transcript of their choices. Provide a concise, constructive analysis report in markdown format.
 
